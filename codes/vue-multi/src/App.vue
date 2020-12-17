@@ -3,10 +3,12 @@
 
     <router-link to="/foo">Go to Foo</router-link>
     <br/>
+    <router-link to="/foo/foo-child">Go to Foo-Child</router-link>
+    <br/>
     <router-link to="/bar">Go to Bar</router-link>
 
     <div>
-      <router-view></router-view>
+      <router-view :key="key"></router-view>
     </div>
   </div>
 </template>
@@ -16,7 +18,12 @@
 export default {
   name: 'App',
   components: {
-  }
+  },
+   computed: {
+            key() {
+                return this.$router.path
+            }
+        }
 }
 </script>
 

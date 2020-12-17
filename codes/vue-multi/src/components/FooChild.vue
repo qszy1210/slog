@@ -1,13 +1,13 @@
 <template>
     <div>
-        foo
-        <router-view />
+        foo-child
     </div>
 </template>
 
 <script>
     export default {
-
+        computed: {
+        }
     }
 </script>
 
