@@ -4,7 +4,15 @@
 >
 > date: 2020/12/06
 
-根据官方文档， 一些事情中并没有给出多级的处理方式， 比如 3 级路由， 3级之间的 slot 传递。
+从 react 转入 vue, 深切感觉 vue 的官方文档真香.
+
+![真香表情包](https://tva1.sinaimg.cn/large/0081Kckwly1glsbfqjjc5j3069069q2y.jpg)
+
+虽然文档比较详细, 但有一些还是让我摸不着头脑, 问了一些用过 `vue` 的同学, 也不能给一个好的答案.
+
+![郁闷表情包](https://tva1.sinaimg.cn/large/0081Kckwly1glsbht4pauj3069069gll.jpg)
+
+ 比如 3(多) 级路由， 3(多)级之间的 slot 传递。
 
 ### 1. vue-router 的通常使用方式
 
@@ -83,7 +91,7 @@ const router = new VueRouter({
 肯定是对应组件的 `children`, 所以由对应的组件负责渲染.
 见如下的解释
 
-![](https://tva1.sinaimg.cn/large/0081Kckwly1gls9o4g788j312u0mwq61.jpg)
+![router-view截图](https://tva1.sinaimg.cn/large/0081Kckwly1glsbu7871cj312u0mw41l.jpg)
 
 
 ##### 总结：
@@ -336,7 +344,9 @@ export default {
 
 必须要有总结， 有反思， 并且代码化才能更好的解决问题。
 
+![努力表情包](https://tva1.sinaimg.cn/large/0081Kckwly1glsbkq3naaj3069069wen.jpg)
+
 将所有的代码都放在地址如下的项目：
 
-[slog](git@github.com:qszy1210/slog.git)
+[vue-multi](https://github.com/qszy1210/slog/tree/master/codes/vue-multi)
 
