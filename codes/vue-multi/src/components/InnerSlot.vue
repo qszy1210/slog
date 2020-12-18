@@ -1,6 +1,6 @@
 <template>
     <div>
-        foo
+        <slot name="inner" :data="'innert-data'" :evt="'innert-evt'"></slot>
     </div>
 </template>
 

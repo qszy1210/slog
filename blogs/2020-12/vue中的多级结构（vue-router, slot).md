@@ -9,39 +9,86 @@
 ### 1. vue-router 的通常使用方式
 
 ```js
+// router.js
+// router 中配置对应的路由
+const router = new VueRouter({
+    routes: [
+        {path: '/foo',  component: Foo,  children: [
+            {
+                path: '/foo/foo-child',
+                component: FooChild
+            }
+        ]},
+        {path: '/bar', component: Bar},
+    ]
+})
 
+// foo.vue
+
+<template>
+    <div>
+        foo
+    </div>
+</template>
 
 ```
 
+```js
+// App.vue 中对应页面设置 link 以及显示
+// router-view 写的地方就会渲染 router 路径指向的 component
+<template>
+  <div id="app">
+    <router-link to="/foo">Go to Foo</router-link>
+    <router-link to="/foo/foo-child">Go to Foo-Child</router-link>
+    <router-link to="/bar">Go to Bar</router-link>
+    <div>
+      <router-view :key="key"></router-view>
+    </div>
+  </div>
+</template>
+```
 
+总结: router-view 写的地方就会渲染 router 路径指向的 component
 
 #### 三级或者更多级别的时候的使用方式
 
-通用情况下，似乎就不好用了。
+但是我们发现, `/foo/foo-child` 这个路径仍然只显示 `foo`, 并不显示我们的 `FooChild` 的内容.
 
-##### 理所当然的尝试
+我们也发现 <router-view> 只是对当前子级的组件进行了显示.
 
-二级增加 index页面
-
-```js
-//增加一些代码
-```
-
-
-
-具体的表现形式为， 似乎只渲染到二级
-
-正确的使用方式：
+如果按照这个思路, 那么我们需要在 `Foo` 组件中增加一个 `<router-viwe>` 来显示三级
 
 ```js
-//而已需要使用 router-view 页面
+// FooChild.vue
+<div>
+    foo-child
+    <router-view :key="key"></router-view>
+</div>
 ```
 
+其他多级的路由, 也是同理.
+
+> 官方介绍: 参考链接 [嵌套路由](https://router.vuejs.org/zh/guide/essentials/nested-routes.html)
+这里边很好的说明了上面的情况
+
+官方介绍:
+
+```js
+<div id="app">
+  <router-view></router-view>
+</div>
+```
+
+默认的一级 `routes` 配置会渲染在这里边. 对应的 `children` 内容
+肯定是对应组件的 `children`, 所以由对应的组件负责渲染.
+见如下的解释
+
+![](https://tva1.sinaimg.cn/large/0081Kckwly1gls9o4g788j312u0mwq61.jpg)
 
 
 ##### 总结：
 
-> router-view 并没有默认实现多层次的渲染， 只是对当前层次的页面进行一级显示， 如果想实现多层次的无线结构， 需要使用到类似 tree 的结构去进行
+> router-view 并没有默认实现多层次的渲染， 只是对当前层次的页面进行一级显示， 如果想实现多层次的无线结构， 需要依次进行配置显示.
 
 
 #### 2. slot 的多级别传递
@@ -51,45 +98,245 @@
 默认的方法如下：
 
 ```js
-//一个 slot 的组件
+//一个 slot 的组件, 并传递简单的数据
+<template>
+    <div>
+        <slot name="header" :data="headerData"></slot>
+        <slot name="body"></slot>
+        <slot name="footer"></slot>
+    </div>
+</template>
+
+export default {
+  data() {
+    return {
+      headerData: {
+        pos: 'header'
+      }
+    }
+  }
+}
 
 //一个使用 slot 的页面， 有属性（数据）的传递
+
+<div>
+  <has-slot>
+    <div slot="header" slot-scope="{data}">header, {{ data.pos }}</div>
+    <div slot="body">body</div>
+    <div slot="footer">footer</div>
+  </has-slot>
+</div>
+
 ```
-
-
 
 ##### 事件传递
 
   1. ##### 认为可以实现的方式： emit 的方式
 
-    ```js
-    // 一个 slot 组件
+  ```js
+//一个 slot 的组件, 并传递简单的数据
+<template>
+    <div @clickdiv="dosomething">
+        <slot name="header" :data="headerData"></slot>
+        <slot name="body"></slot>
+        <slot name="footer"></slot>
+    </div>
+</template>
+
+<script>
+ export default {
+  data() {
+    return {
+      headerData: {
+        pos: 'header'
+      }
+    }
+  },
+  methods: {
+      // 不起作用
+      dosomething() {
+          console.log('dosomething')
+      }
+  },
+}
+</script>
+
+//一个使用 slot 的页面， 有属性（数据）的传递, 和 事件接收
+
+<template>
+  <div id="app">
+    <router-link to="/foo">Go to Foo</router-link>
+    <br/>
+    <router-link to="/foo/foo-child">Go to Foo-Child</router-link>
+    <br/>
+    <router-link to="/bar">Go to Bar</router-link>
+
+    <div>
+      <router-view :key="key"></router-view>
+    </div>
 
 
-    //一个使用 slot 的页面， 在 slot 中 emit 一个事件出去
-    ```
+    <div>
+      <has-slot>
+        <div slot="header" slot-scope="{data}" @click="$emit('clickdiv')">header, {{ data.pos }}</div>
+        <div slot="body">body</div>
+        <div slot="footer">footer</div>
+      </has-slot>
+    </div>
+  </div>
+</template>
 
-    **总结**：emit 只是对父组件， 即调用本组件的上层组件才会起作用。 所以， 对于 slot 来说， 原来的接受 slot 的组件， 是不知道这个事件的。 所以我们只能通过类似属性传递的方式进行
+<script>
+import HasSlot from './components/HasSlot'
+export default {
+  name: 'App',
+  components: {
+    HasSlot
+  },
+   computed: {
+      key() {
+          return this.$router.path
+      }
+  }
+}
+</script>
 
-  2. ##### 正确的方式
+  ```
 
-     ```js
-     //通过属性进行传递事件
-     ```
+**总结**：emit 只是对父组件， 即调用本组件的上层组件才会起作用。 所以， 对于 slot 来说， 原来的接受 slot 的组件， 是不知道这个事件的。 所以我们只能通过类似属性传递的方式进行
+
+##### 正确的方式
+
+```js
+//通过属性进行传递事件
+<template>
+    <div @clickdiv="dosomething">
+        <slot name="header"
+        :data="{data: headerData, evt: callback}"
+        ></slot>
+        <slot name="body"></slot>
+        <slot name="footer"></slot>
+    </div>
+</template>
+
+<script>
+ export default {
+  data() {
+    return {
+      headerData: {
+        pos: 'header'
+      }
+    }
+  },
+  methods: {
+      dosomething() {
+          console.log('dosomething')
+      },
+      callback(param) {
+        console.log('callback', param)
+      }
+  },
+}
+</script>
+
+//使用的页面
+
+<template>
+  <div id="app">
+    <router-link to="/foo">Go to Foo</router-link>
+    <br/>
+    <router-link to="/foo/foo-child">Go to Foo-Child</router-link>
+    <br/>
+    <router-link to="/bar">Go to Bar</router-link>
+
+    <div>
+      <router-view :key="key"></router-view>
+    </div>
+
+    <div>
+      <has-slot>
+        <div slot="header" slot-scope="{data}" >header, {{ data.data + data.evt }}
+          <div @click="data.evt('outer')">click</div>
+        </div>
+        <div slot="body">body</div>
+        <div slot="footer">footer</div>
+      </has-slot>
+    </div>
+  </div>
+</template>
+
+<script>
+import HasSlot from './components/HasSlot'
+export default {
+  name: 'App',
+  components: {
+    HasSlot
+  },
+   computed: {
+      key() {
+          return this.$router.path
+      }
+  },
+  methods: {
+  },
+}
+</script>
+```
+
+**因为js方法也是一个一等公民, 所以方法也是可以通过引用进行传递出来的**
+
+
+
+##### 多级别的传递
+
+> 上边说了事件和属性的传递, 那么对于多级的传递是怎么进行呢?
+
+其实了解了上边的情况, 多级也是比较好理解的.
+
+正常使用 `slot` 的时候, 我们是一个组件,  `slot=` 声明组件的时候, 是 `<slot name="">` 的方式.
+
+所以三级组件会是这个形式:
+
+```js
+<template>
+  <div @clickdiv="dosomething">
+  	<!--外部声明-->
+    <slot name="header" :data="{ data: headerData, evt: callback }">
+      <inner-slot>
+      	<!--内部使用-->
+        <div slot="inner" slot-scope="{data, evt}">
+          {{ data + ':' + evt}}
+        </div>
+      </inner-slot>
+    </slot>
+    <slot name="body"></slot>
+    <slot name="footer"></slot>
+  </div>
+</template>
+```
+
+
 
 ##### 总结：
 
 > vue 在文档中给出了 slot  的编译后的代码的样子
 >
+> [解构插槽](https://cn.vuejs.org/v2/guide/components-slots.html#%E8%A7%A3%E6%9E%84%E6%8F%92%E6%A7%BD-Prop)
+>
 > ```js
 > //vue文档中关于 slot 的描述
+> function (slotProps) {
+>   // 插槽内容
+> }
 > ```
 >
-> 所以我们知道， 其实 slot 所有的内容只能通过这个参数进行传递， 并且我们根据 emit 的机制， 也应该推算到， 我们通过 emit 是传递不出去这个事件的。
+> 所以我们知道， 其实 slot 所有的内容只能通过这个参数进行传递， 并且我们根据 emit 的机制， 也应该推算到， 我们通过 emit 是传递不出去这个事件的. 只能向外部使用的父组件进行传递.
 
-### 代码总结以及示范
+### 代码位置
 
 必须要有总结， 有反思， 并且代码化才能更好的解决问题。
 
 将所有的代码都放在地址如下的项目：
+
+[slog](git@github.com:qszy1210/slog.git)
 

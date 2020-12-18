@@ -1,6 +1,5 @@
 <template>
   <div id="app">
-
     <router-link to="/foo">Go to Foo</router-link>
     <br/>
     <router-link to="/foo/foo-child">Go to Foo-Child</router-link>
@@ -10,20 +9,35 @@
     <div>
       <router-view :key="key"></router-view>
     </div>
+
+    <div>
+      <has-slot>
+        <div slot="header" slot-scope="{data}" >header, {{ data.data + data.evt }}
+          <div @click="data.evt('outer')">
+            inner click
+          </div>
+        </div>
+        <div slot="body">body</div>
+        <div slot="footer">footer</div>
+      </has-slot>
+    </div>
   </div>
 </template>
 
 <script>
-
+import HasSlot from './components/HasSlot'
 export default {
   name: 'App',
   components: {
+    HasSlot,
   },
    computed: {
-            key() {
-                return this.$router.path
-            }
-        }
+      key() {
+          return this.$router.path
+      }
+  },
+  methods: {
+  },
 }
 </script>
 
