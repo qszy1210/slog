@@ -5,6 +5,8 @@
     <router-link to="/foo/foo-child">Go to Foo-Child</router-link>
     <br/>
     <router-link to="/bar">Go to Bar</router-link>
+    <br />
+    <router-link to="/async">asyncLoad</router-link>
 
     <div>
       <router-view :key="key"></router-view>
