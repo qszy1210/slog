@@ -1,9 +1,40 @@
 #!/usr/bin/env node
 
 var child_process = require('child_process');
+var fs = require('fs');
+var path = require('path');
 
 function copyDir(src, dist) {
   child_process.spawn('cp', ['-r', src, dist]);
 }
 
+function replaceFileContent(filePath, srcContent, targetContent) {
+
+    fs.readFile(path.resolve(filePath), 'utf8', function (err, data) {
+      if (err) {
+        return console.log(err);
+      }
+      var result = data.replace(new RegExp(srcContent, 'g'), targetContent);
+
+      fs.writeFile(path.resolve(filePath), result, 'utf8', function (err) {
+        if (err) return console.log(err);
+      });
+    });
+}
+
+const { Command } = require('commander');
+const program = new Command();
+program.version('0.0.1') //声明一下版本, 通过 -V 来获取
+
+
 copyDir('./template', './project');
+
+program
+  .command('create <name>')
+  .description('create your project')
+  .action((name) => {
+    console.log('build', name);
+    replaceFileContent('./project/index.js', '<%=name>', name)
+  });
+
+program.parse(process.argv)
